@@ -24,9 +24,16 @@ RUN ln -s /etc/nginx/sites-available/zeppelin /etc/nginx/conf.d/default.conf
 #RUN sed -ir "s/443 ssl http2/80/g" /etc/nginx/conf.d/default.conf
 
 WORKDIR /app/ZeppelinBot
+# Change 'master' to 'main' here
 ARG GIT_REPO=https://github.com/Dragory/ZeppelinBot.git
-ARG GIT_BRANCH=master
+ARG GIT_BRANCH=main
+
 RUN git clone $GIT_REPO . && git switch $GIT_BRANCH
+
+# Upgrade Node and use pnpm (fixes the workspace protocol error)
+RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN pnpm install
+RUN pnpm run build
 
 RUN nvm install 16
 RUN touch .env
